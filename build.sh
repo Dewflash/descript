@@ -10,14 +10,17 @@ ZIP_PATH="${DIST_DIR}/${APP_NAME}.zip"
 DMG_PATH="${DIST_DIR}/${APP_NAME}.dmg"
 
 PYTHON_BIN="${PYTHON_BIN:-python3}"
+VENV_DIR="${VENV_DIR:-.venv}"
+VENV_PYTHON="${VENV_DIR}/bin/python"
 
 if ! command -v ffmpeg >/dev/null 2>&1; then
   echo "Warning: ffmpeg was not found on PATH. Install it with: brew install ffmpeg"
 fi
 
-"${PYTHON_BIN}" -m pip install --upgrade pip
-"${PYTHON_BIN}" -m pip install -r requirements.txt
-"${PYTHON_BIN}" -m PyInstaller --clean --noconfirm build.spec
+"${PYTHON_BIN}" -m venv "${VENV_DIR}"
+"${VENV_PYTHON}" -m pip install --upgrade pip
+"${VENV_PYTHON}" -m pip install -r requirements.txt
+"${VENV_PYTHON}" -m PyInstaller --clean --noconfirm build.spec
 
 rm -f "${ZIP_PATH}" "${DMG_PATH}"
 ditto -c -k --keepParent "${APP_PATH}" "${ZIP_PATH}"
