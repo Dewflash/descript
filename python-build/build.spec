@@ -75,7 +75,7 @@ app = BUNDLE(
         "CFBundleName": APP_NAME,
         "CFBundleShortVersionString": "1.0.0",
         "CFBundleVersion": "1.0.0",
-        "LSUIElement": True,
+        "LSUIElement": False,
         "NSHumanReadableCopyright": "Copyright © 2026",
         "NSSpeechRecognitionUsageDescription": "This app transcribes selected MP4 files using Apple's on-device speech recognition.",
         "NSMicrophoneUsageDescription": "This app does not record microphone audio, but macOS may require microphone permission for speech recognition services.",

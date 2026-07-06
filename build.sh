@@ -2,28 +2,38 @@
 set -euo pipefail
 
 cd "$(dirname "$0")"
+export COPYFILE_DISABLE=1
 
-APP_NAME="Transcript Extractor"
-DIST_DIR="dist"
-APP_PATH="${DIST_DIR}/${APP_NAME}.app"
-ZIP_PATH="${DIST_DIR}/${APP_NAME}.zip"
-DMG_PATH="${DIST_DIR}/${APP_NAME}.dmg"
+APP_NAME="Descript"
+BUILD_DIR="build"
+RELEASE_DIR="release"
+APP_PATH="${BUILD_DIR}/${APP_NAME}.app"
+EXECUTABLE_PATH="${APP_PATH}/Contents/MacOS/${APP_NAME}"
+ZIP_PATH="${RELEASE_DIR}/${APP_NAME}-0.1.0.zip"
+DMG_PATH="${RELEASE_DIR}/${APP_NAME}-0.1.0.dmg"
 
-PYTHON_BIN="${PYTHON_BIN:-python3}"
-VENV_DIR="${VENV_DIR:-.venv}"
-VENV_PYTHON="${VENV_DIR}/bin/python"
+rm -rf "${BUILD_DIR}"
+mkdir -p "${APP_PATH}/Contents/MacOS" "${APP_PATH}/Contents/Resources" "${RELEASE_DIR}"
 
-if ! command -v ffmpeg >/dev/null 2>&1; then
-  echo "Warning: ffmpeg was not found on PATH. Install it with: brew install ffmpeg"
-fi
+swiftc \
+  -O \
+  -parse-as-library \
+  -o "${EXECUTABLE_PATH}" \
+  Sources/DescriptApp.swift \
+  Sources/DescriptModel.swift \
+  Sources/TranscriptServices.swift \
+  -framework AppKit \
+  -framework SwiftUI \
+  -framework AVFoundation \
+  -framework Speech \
+  -framework UniformTypeIdentifiers
 
-"${PYTHON_BIN}" -m venv "${VENV_DIR}"
-"${VENV_PYTHON}" -m pip install --upgrade pip
-"${VENV_PYTHON}" -m pip install -r requirements.txt
-"${VENV_PYTHON}" -m PyInstaller --clean --noconfirm build.spec
+cp Info.plist "${APP_PATH}/Contents/Info.plist"
+cp Resources/DescriptIcon.icns "${APP_PATH}/Contents/Resources/DescriptIcon.icns"
+chmod +x "${EXECUTABLE_PATH}"
 
 rm -f "${ZIP_PATH}" "${DMG_PATH}"
-ditto -c -k --keepParent "${APP_PATH}" "${ZIP_PATH}"
+ditto -c -k --norsrc --noextattr --keepParent "${APP_PATH}" "${ZIP_PATH}"
 hdiutil create -volname "${APP_NAME}" -srcfolder "${APP_PATH}" -ov -format UDZO "${DMG_PATH}"
 
 echo "Built:"
