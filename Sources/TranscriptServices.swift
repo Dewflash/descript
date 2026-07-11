@@ -51,14 +51,23 @@ struct YouTubeTranscriptService {
         let videoID = try extractVideoID(from: input)
         let html = try await fetchWatchHTML(videoID: videoID)
 
-        if let apiKey = firstRegexCapture(#""INNERTUBE_API_KEY":\s*"([a-zA-Z0-9_-]+)""#, in: html),
-           let text = try await fetchTranscriptViaAndroidPlayer(videoID: videoID, apiKey: apiKey) {
-            return text
+        var androidPlayerError: Error?
+        if let apiKey = firstRegexCapture(#""INNERTUBE_API_KEY":\s*"([a-zA-Z0-9_-]+)""#, in: html) {
+            do {
+                if let text = try await fetchTranscriptViaAndroidPlayer(videoID: videoID, apiKey: apiKey) {
+                    return text
+                }
+            } catch {
+                androidPlayerError = error
+            }
         }
 
-        guard let tracks = captionTracks(fromHTML: html),
-              let text = try await fetchTranscript(fromTracks: tracks) else {
-            throw DescriptError.noTranscriptText
+        guard let tracks = captionTracks(fromHTML: html) else {
+            throw androidPlayerError ?? DescriptError.missingCaptionTracks
+        }
+
+        guard let text = try await fetchTranscript(fromTracks: tracks) else {
+            throw androidPlayerError ?? DescriptError.noTranscriptText
         }
 
         return text
