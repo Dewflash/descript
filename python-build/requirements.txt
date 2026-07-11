@@ -1,9 +1,0 @@
-pyinstaller>=6.9,<7
-rumps>=0.4.0,<0.5
-pyperclip>=1.9.0,<2
-youtube-transcript-api>=1.0.0,<2
-pydub>=0.25.1,<0.26
-audioop-lts>=0.2.1; python_version >= "3.13"
-pyobjc-core>=10.3,<12
-pyobjc-framework-Cocoa>=10.3,<12
-pyobjc-framework-Speech>=10.3,<12
