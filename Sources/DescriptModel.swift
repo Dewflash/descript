@@ -70,6 +70,7 @@ final class DescriptModel: ObservableObject {
     @Published var mp4Accent: Accent
 
     private let defaults = UserDefaults.standard
+    var presentPopup: (() -> Void)?
 
     init() {
         youtubeAccent = Accent(rawValue: defaults.string(forKey: "youtubeAccent") ?? "") ?? .emerald
@@ -138,7 +139,9 @@ final class DescriptModel: ObservableObject {
         panel.canChooseFiles = true
         panel.message = "Choose an MP4 video to transcribe"
 
-        guard panel.runModal() == .OK, let url = panel.url else { return }
+        let response = panel.runModal()
+        presentPopup?()
+        guard response == .OK, let url = panel.url else { return }
 
         source = .mp4
         selectedFileName = url.lastPathComponent
@@ -171,7 +174,9 @@ final class DescriptModel: ObservableObject {
         panel.allowedContentTypes = [.plainText]
         panel.nameFieldStringValue = "transcript.txt"
 
-        guard panel.runModal() == .OK, let url = panel.url else { return }
+        let response = panel.runModal()
+        defer { presentPopup?() }
+        guard response == .OK, let url = panel.url else { return }
 
         do {
             try transcript.write(to: url, atomically: true, encoding: .utf8)
@@ -186,11 +191,13 @@ final class DescriptModel: ObservableObject {
     }
 
     private func showError(_ message: String) {
+        NSApp.activate(ignoringOtherApps: true)
         let alert = NSAlert()
         alert.messageText = "Descript"
         alert.informativeText = message
         alert.alertStyle = .warning
         alert.runModal()
+        presentPopup?()
     }
 
     private func wordCount(_ value: String) -> Int {

@@ -41,6 +41,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 .frame(width: 400)
         )
         self.popover = popover
+        model.presentPopup = { [weak self] in
+            self?.presentPopupIfNeeded()
+        }
     }
 
     @objc private func togglePopover(_ sender: NSStatusBarButton) {
@@ -62,6 +65,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         NSApp.activate(ignoringOtherApps: true)
         popover.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
+    }
+
+    private func presentPopupIfNeeded() {
+        guard let popover, let button = statusItem?.button else { return }
+        guard !popover.isShown else { return }
+        NSApp.activate(ignoringOtherApps: true)
+        popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
     }
 
     @objc private func openPopoverFromMenu(_ sender: NSMenuItem) {
