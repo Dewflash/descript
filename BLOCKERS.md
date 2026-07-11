@@ -49,3 +49,35 @@ What I tried:
 Required unblock:
 
 Grant the automation host assistive access, and preferably screen recording access, then rerun PLAN-popup-persistence.md from the last green commit. Without that access, the required manual checks cannot be honestly marked passed.
+
+## PLAN-launch-at-login.md — blocked by popup persistence dependency
+
+Date: 2026-07-11
+Blocking plan: `PLAN-popup-persistence.md`
+Last green implementation commit: `fd59038`
+
+`PLAN-launch-at-login.md` depends on `PLAN-popup-persistence.md` according to `AGENTS.md`.
+Because popup persistence could not be completed or committed, launch-at-login was not run.
+
+Failing command:
+
+```bash
+osascript -e 'tell application "System Events" to tell process "Descript" to get {name, role, subrole, description} of every UI element'
+```
+
+Full output inherited from the blocking plan:
+
+```text
+67:101: execution error: System Events got an error: osascript is not allowed assistive access. (-1728)
+```
+
+What I tried:
+
+- Confirmed `PLAN-launch-at-login.md` depends on `PLAN-popup-persistence.md`.
+- Confirmed `PLAN-popup-persistence.md` is logged above as blocked on macOS assistive access.
+- Skipped launch-at-login implementation rather than editing the same source files on top of an unlanded dependency.
+- Removed launch-at-login from README and marked QA row 19 `N/A` in `RELEASE-QA.md`.
+
+Required unblock:
+
+Complete and commit `PLAN-popup-persistence.md`, then rerun `PLAN-launch-at-login.md` from a clean tree.
